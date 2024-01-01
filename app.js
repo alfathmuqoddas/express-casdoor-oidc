@@ -52,6 +52,13 @@ passport.deserializeUser((obj, done) => {
   done(null, obj);
 });
 
+function requireLogin(req, res, next) {
+  if (!req.isAuthenticated()) {
+    return res.redirect("/login");
+  }
+  next();
+}
+
 app.get("/", (req, res) => {
   res.send("<a href='/login'>Log In with OAuth 2.0 Provider </a>");
 });
@@ -66,12 +73,12 @@ app.get(
   }
 );
 
-app.get("/profile", (req, res) => {
+app.get("/profile", requireLogin, (req, res) => {
   res.json(req.user);
 });
 
-app.get("/logout", function (req, res, next) {
-  req.logout(function (err) {
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
     if (err) {
       return next(err);
     }
